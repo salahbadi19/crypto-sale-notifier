@@ -1,6 +1,6 @@
 # bot.py
-# بوت USDT Flash - نسخة نهائية مع زر تأكيد التحويل في لوحة الإدارة
-# الإصدار: v4.0 (محدث - يرد على /start - زر تأكيد مع الصورة)
+# بوت USDT Flash - نسخة نهائية مع زر تأكيد التحويل
+# الإصدار: v4.0 (محدث - لا يحذف الرسائل - توكن جديد)
 
 import logging
 import re
@@ -19,7 +19,7 @@ from telegram.ext import (
 # 🧩 1) البيانات الثابتة
 # --------------------------
 
-BOT_TOKEN = "8448080764:AAFQqt_QCJroubj_0mwqZ-ZQh2fp6LSwQoE"
+BOT_TOKEN = "8448080764:AAFQqt_QCJroubj_0mwqZ-ZQh2fp6LSwQoE"  # ✅ التوكن الجديد
 ADMIN_ID = 8251525181
 SUPPORT_USERNAME = "ahmede726"
 PROOFS_CHANNEL = "flashusdt2000"
@@ -46,9 +46,9 @@ NETWORKS = {
 
 # 📄 وصف العملات
 DESCRIPTIONS = {
-    "usdt_flash": "<b>💵 USDT Flash</b>\n\nخدمة فلاش فورية مع نسبة نجاح عالية.\nاختر الباقة المناسبة واضغط <b>شراء الآن</b>.",
-    "bnb_flash": "<b>🔶 BNB Flash</b>\n\nتنفيذ سريع ورسوم منخفضة.\nاختر الباقة المناسبة واضغط <b>شراء الآن</b>.",
-    "usdtz_flash": "<b>🔷 USDT.Z Flash</b>\n\nإصدار خاص بسرعات تحويل محسنة.\nاختر الباقة المناسبة واضغط <b>شراء الآن</b>.",
+    "usdt_flash": "<b>💵 USDT Flash</b>\n\nخدمة فلاش فورية مع نسبة نجاح عالية.\nاختَر الباقة المناسبة واضغط <b>شراء الآن</b>.",
+    "bnb_flash": "<b>🔶 BNB Flash</b>\n\nتنفيذ سريع ورسوم منخفضة.\nاختَر الباقة المناسبة واضغط <b>شراء الآن</b>.",
+    "usdtz_flash": "<b>🔷 USDT.Z Flash</b>\n\nإصدار خاص بسرعات تحويل محسّنة.\nاختَر الباقة المناسبة واضغط <b>شراء الآن</b>.",
 }
 
 # --------------------------
@@ -81,11 +81,7 @@ def create_keyboard(buttons: list, cols: int = 2) -> InlineKeyboardMarkup:
     keyboard = [buttons[i:i + cols] for i in range(0, len(buttons), cols)]
     return InlineKeyboardMarkup(keyboard)
 
-async def safe_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int):
-    try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-    except Exception as e:
-        logger.debug(f"فشل حذف الرسالة {message_id}: {e}")
+# ❌ تم إزالة safe_delete_message تمامًا
 
 # --------------------------
 # 📡 Handlers
@@ -107,16 +103,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_markup = create_keyboard(buttons, cols=2)
 
     caption = (
-        "<b>👋 أهلا بك في بوت العروض الخاصة</b>\n\n"
-        "◀ اختر من القائمة أدناه لعرض <b>🎁 عروضنا</b> أو تواصل مع <b>الدعم الفني</b>.\n"
+        "<b>👋 أهلاً بك في بوت العروض الخاصة</b>\n\n"
+        "◀️ اختر من القائمة أدناه لعرض <b>🎁 عروضنا</b> أو تواصل مع <b>الدعم الفني</b>.\n"
         "🧾 في حال وجود أي استفسار لا تتردد بالتواصل."
     )
 
-    if update.message:
-        try:
-            await update.message.delete()
-        except:
-            pass
+    # ✅ تم إزالة: await update.message.delete()
+    # لن يحذف أي رسالة
 
     try:
         await context.bot.send_video(
@@ -154,10 +147,8 @@ async def show_offers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     reply_markup = create_keyboard(buttons, cols=2)
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
+    # سيبقى الزر "عرض العروض" كما هو
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
@@ -172,7 +163,7 @@ async def show_currency_details(update: Update, context: ContextTypes.DEFAULT_TY
     currency_key = query.data.split("_", 1)[1]
 
     if currency_key not in DESCRIPTIONS:
-        await context.bot.send_message(query.message.chat_id, "⚠ عملة غير معروفة.")
+        await context.bot.send_message(query.message.chat_id, "⚠️ عملة غير معروفة.")
         return
 
     buttons = [
@@ -189,7 +180,6 @@ async def show_currency_details(update: Update, context: ContextTypes.DEFAULT_TY
             reply_markup=reply_markup,
             parse_mode=constants.ParseMode.HTML
         )
-        await query.delete_message()
     except Exception:
         await context.bot.send_message(
             chat_id=query.message.chat_id,
@@ -197,7 +187,7 @@ async def show_currency_details(update: Update, context: ContextTypes.DEFAULT_TY
             reply_markup=reply_markup,
             parse_mode=constants.ParseMode.HTML
         )
-        await query.delete_message()
+    # ✅ تم إزالة: await query.delete_message()
 
 # --------------------------
 # تدفق الشراء
@@ -222,14 +212,11 @@ async def show_packs(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     reply_markup = create_keyboard(buttons, cols=2)
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
-        text=f"🛒 <b>اختر الباقة</b>\n\nالسعر يحسب تلقائيا: كل 500 = <b>{PRICE_PER_500}$</b>",
+        text=f"🛒 <b>اختر الباقة</b>\n\nالسعر يُحسب تلقائيًا: كل 500 = <b>{PRICE_PER_500}$</b>",
         reply_markup=reply_markup,
         parse_mode=constants.ParseMode.HTML
     )
@@ -269,10 +256,7 @@ async def select_pack(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     reply_markup = create_keyboard(buttons, cols=2)
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
@@ -289,24 +273,21 @@ async def select_method(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user_id = update.effective_user.id
 
     if user_id not in user_states or user_states[user_id]["step"] != "awaiting_method":
-        await context.bot.send_message(query.message.chat_id, "⚠ حدث خطأ. ابدأ من جديد.")
+        await context.bot.send_message(query.message.chat_id, "⚠️ حدث خطأ. ابدأ من جديد.")
         return
 
     user_states[user_id]["method"] = method_key
     prompts = {
-        "binance": "🔹 أرسل <b>معرف Binance</b> الخاص بك.",
+        "binance": "🔹 أرسل <b>معرّف Binance</b> الخاص بك.",
         "erc20": "🔹 أرسل <b>عنوان محفظة Ethereum (ERC-20)</b>.",
         "trc20": "🔹 أرسل <b>عنوان محفظة TRON (TRC-20)</b>."
     }
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
-        text=prompts.get(method_key, "⚠ طريقة غير معروفة."),
+        text=prompts.get(method_key, "⚠️ طريقة غير معروفة."),
         parse_mode=constants.ParseMode.HTML
     )
 
@@ -331,7 +312,7 @@ async def handle_wallet_input(update: Update, context: ContextTypes.DEFAULT_TYPE
         f"المبلغ المطلوب: <b>{state['price']}$</b>\n"
         f"عنوان الدفع: <code>{PAYMENT_ADDRESS}</code>\n"
         f"الشبكة: <b>{NETWORK_NAME}</b>\n\n"
-        "⚠ قبل إرسال الصورة، تأكد من إتمام التحويل إلى هذا العنوان.\n"
+        "⚠️ قبل إرسال الصورة، تأكد من إتمام التحويل إلى هذا العنوان.\n"
         "اضغط الزر أدناه بعد الدفع لإرسال لقطة شاشة."
     )
 
@@ -347,7 +328,6 @@ async def handle_wallet_input(update: Update, context: ContextTypes.DEFAULT_TYPE
     user_states[user_id]["step"] = "awaiting_payment_confirmation"
 
     # ✅ تم إزالة رسالة "طلب جديد" للأدمن هنا
-    # لن ترسل أي رسالة حتى يرسل المستخدم لقطة شاشة
 
 # --------------------------
 # استلام لقطة الشاشة
@@ -362,14 +342,11 @@ async def payment_done(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await context.bot.send_message(query.message.chat_id, "الطلب غير موجود.")
         return
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
-        text="📸 من فضلك أرسل <b>لقطة شاشة</b> تثبت عملية الدفع (يجب أن تظهر العنوان والشبكة والمبلغ).",
+        text="📸 من فضلك أرسل <b>لقطة شاشة</b> تُثبت عملية الدفع (يجب أن تظهر العنوان والشبكة والمبلغ).",
         parse_mode=constants.ParseMode.HTML
     )
 
@@ -380,7 +357,7 @@ async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return
 
     if not update.message.photo:
-        await update.message.reply_text("⚠ من فضلك أرسل <b>صورة</b> (لقطة شاشة)، وليس رسالة نصية.", parse_mode=constants.ParseMode.HTML)
+        await update.message.reply_text("⚠️ من فضلك أرسل <b>صورة</b> (لقطة شاشة)، وليس رسالة نصية.", parse_mode=constants.ParseMode.HTML)
         return
 
     user_states[user_id]["step"] = "pending"
@@ -426,7 +403,7 @@ async def handle_screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         logger.error(f"فشل إرسال الصورة والتفاصيل للأدمن: {e}")
         try:
             fallback_msg = (
-                f"⚠ لم يتمكن البوت من إرسال الصورة.\n"
+                f"⚠️ لم يتمكن البوت من إرسال الصورة.\n"
                 f"طلب من: {state['user_name']} (@{state['username']})\n"
                 f"العملة: {CURRENCIES.get(state['currency'])} | الكمية: {state['amount']}\n"
                 f"العنوان: <code>{state['wallet']}</code>"
@@ -455,7 +432,7 @@ async def confirm_order_callback(update: Update, context: ContextTypes.DEFAULT_T
         return
 
     if target_user_id not in user_states or user_states[target_user_id]["step"] != "pending":
-        await query.edit_message_text("❌ الطلب غير موجود أو تم تأكيده مسبقا.")
+        await query.edit_message_text("❌ الطلب غير موجود أو تم تأكيده مسبقًا.")
         return
 
     state = user_states[target_user_id]
@@ -467,9 +444,9 @@ async def confirm_order_callback(update: Update, context: ContextTypes.DEFAULT_T
             chat_id=target_user_id,
             text=(
                 "✅ <b>تم تأكيد طلبك!</b>\n\n"
-                "جار تحويل <b>{amount} {currency}</b> إلى عنوانك...\n"
+                "جارٍ تحويل <b>{amount} {currency}</b> إلى عنوانك...\n"
                 "سيصلك الرصيد خلال دقائق قليلة.\n\n"
-                "شكرا لثقتك بنا ❤"
+                "شكرًا لثقتك بنا ❤️"
             ).format(amount=state['amount'], currency=currency_display.split()[1]),
             parse_mode=constants.ParseMode.HTML
         )
@@ -491,16 +468,13 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
 
     keyboard = [
-        [InlineKeyboardButton("✏ تعديل عنوان الدفع", callback_data="edit_address")],
+        [InlineKeyboardButton("✏️ تعديل عنوان الدفع", callback_data="edit_address")],
         [InlineKeyboardButton("📦 تعديل الباقات", callback_data="edit_packs")],
         [InlineKeyboardButton("📋 عرض الطلبات", callback_data="view_requests")],
         [InlineKeyboardButton("🔙 رجوع", callback_data="start")]
     ]
 
-    try:
-        await query.delete_message()
-    except:
-        pass
+    # ✅ تم إزالة: await query.delete_message()
 
     await context.bot.send_message(
         chat_id=query.message.chat_id,
@@ -514,7 +488,11 @@ async def edit_address_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE
     await query.answer()
     if update.effective_user.id != ADMIN_ID:
         return
-    await query.edit_message_text("✏ أرسل الآن <b>عنوان الدفع الجديد</b> ليتم تحديثه.", parse_mode=constants.ParseMode.HTML)
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text="✏️ أرسل الآن <b>عنوان الدفع الجديد</b> ليتم تحديثه.",
+        parse_mode=constants.ParseMode.HTML
+    )
     admin_waiting[ADMIN_ID] = "awaiting_payment_info"
 
 async def edit_packs_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -522,7 +500,11 @@ async def edit_packs_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     await query.answer()
     if update.effective_user.id != ADMIN_ID:
         return
-    await query.edit_message_text("✏ أرسل القيم كأرقام مفصولة بفواصل (مثال: 500,1000,1500).", parse_mode=constants.ParseMode.HTML)
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text="✏️ أرسل القيم كأرقام مفصولة بفواصل (مثال: 500,1000,1500).",
+        parse_mode=constants.ParseMode.HTML
+    )
     admin_waiting[ADMIN_ID] = "awaiting_packs"
 
 async def view_pending_requests(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -533,10 +515,10 @@ async def view_pending_requests(update: Update, context: ContextTypes.DEFAULT_TY
 
     pending = [s for s in user_states.values() if s.get("step") == "pending"]
     if not pending:
-        await query.edit_message_text("🟢 لا توجد طلبات معلقة.")
+        await context.bot.send_message(chat_id=query.message.chat_id, text="🟢 لا توجد طلبات معلقة.")
         return
 
-    await query.edit_message_text("📋 الطلبات المعلقة:")
+    await context.bot.send_message(chat_id=query.message.chat_id, text="📋 الطلبات المعلقة:")
 
     for s in pending:
         msg = (
@@ -571,11 +553,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         elif action == "awaiting_packs":
             try:
                 global PACKS
-                PACKS = sorted(set(map(int, [x.strip() for x in update.message.text.split(",") if x.strip()])) )
+                PACKS = sorted(set(map(int, [x.strip() for x in update.message.text.split(",") if x.strip()])))
                 await update.message.reply_text("✅ تم تحديث قائمة الباقات بنجاح.")
                 del admin_waiting[ADMIN_ID]
             except:
-                await update.message.reply_text("⚠ صيغة غير صحيحة. جرب مجددا.")
+                await update.message.reply_text("⚠️ صيغة غير صحيحة. جرّب مجددًا.")
         return
 
     # معالجة الرسائل فقط إذا كان المستخدم في تدفق شراء
@@ -593,7 +575,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     logger.error("Error: %s\n%s", context.error, context.error.__traceback__)
     if isinstance(update, Update) and update.effective_chat:
         try:
-            await context.bot.send_message(update.effective_chat.id, "⚠ حدث خطأ داخلي. تم الإبلاغ.")
+            await context.bot.send_message(update.effective_chat.id, "⚠️ حدث خطأ داخلي. تم الإبلاغ.")
         except:
             pass
 
@@ -604,10 +586,8 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 def main() -> None:
     application = Application.builder().token(BOT_TOKEN).build()
 
-    # ✅ تم إعادة /start
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(start, pattern="^start$"))
-
     application.add_handler(CallbackQueryHandler(show_offers, pattern="^offers$"))
     application.add_handler(CallbackQueryHandler(show_currency_details, pattern=r"^currency_"))
     application.add_handler(CallbackQueryHandler(show_packs, pattern=r"^buy_"))
@@ -630,4 +610,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-                          
