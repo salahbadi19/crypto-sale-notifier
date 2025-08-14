@@ -82,6 +82,21 @@ def create_keyboard(buttons: list, cols: int = 2) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 # ❌ تم إزالة safe_delete_message تمامًا
+# --------------------------
+# طلب عرض خاص
+# --------------------------
+async def contact_support(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+
+    await context.bot.send_message(
+        chat_id=query.message.chat_id,
+        text=(
+            "💬 يمكنك التواصل معنا لطلب عرض خاص:\n"
+            f"• الدعم الفني: @{SUPPORT_USERNAME}\n"
+            "• ارسل لنا التفاصيل لنقوم بمساعدتك مباشرة."
+        )
+    )
 
 # --------------------------
 # 📡 Handlers
@@ -599,6 +614,7 @@ def main() -> None:
     application.add_handler(CallbackQueryHandler(edit_packs_prompt, pattern="^edit_packs$"))
     application.add_handler(CallbackQueryHandler(view_pending_requests, pattern="^view_requests$"))
     application.add_handler(CallbackQueryHandler(confirm_order_callback, pattern=r"^confirm_\d+$"))
+    application.add_handler(CallbackQueryHandler(contact_support, pattern="^contact_support$"))
 
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(MessageHandler(filters.PHOTO, handle_screenshot))
